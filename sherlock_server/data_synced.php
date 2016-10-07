@@ -10,26 +10,26 @@ if($_POST['data_synced']){
 	if(!$dbconn) return;
 //	echo "2";
 	$db = "Sherlockx_General";
-	$db_selected = mysqli_select_db($db, $dbconn);
+	$db_selected = mysqli_select_db($dbconn,$db);
 
 	if(!$db_selected){
 		$sql = 'CREATE DATABASE '.$db;
-		mysqli_query($sql,$dbconn);
+		mysqli_query($dbconn,$sql);
 
 	}
 //	echo "3";
 	$q = "CREATE TABLE IF NOT EXISTS threshold ( email VARCHAR (255) DEFAULT NULL , date VARCHAR (255) , size INTEGER DEFAULT 0,PRIMARY KEY(email))";
 
-	if(mysqli_query($q,$dbconn)){
+	if(mysqli_query($dbconn,$q)){
 //		echo "4";
 		$q = "SELECT * FROM threshold WHERE email ='$email'";
-		if($result=mysqli_query($q,$dbconn)){
+		if($result=mysqli_query($dbconn,$q)){
 			if(mysqli_num_rows($result)==0){
 
 				$date = date('d-m-o');
 
 				$sql = "REPLACE INTO threshold (email,date,size) VALUES ('$email' , '$date' ,'$size')";
-				mysqli_query($sql,$dbconn);
+				mysqli_query($dbconn,$sql);
 
 			}
 			else{
@@ -39,7 +39,7 @@ if($_POST['data_synced']){
 				$sz= $row['size'];
 				$size = $size + $sz;
                 $sql = "REPLACE INTO threshold (email,date,size) VALUES ('$email' , '$date' ,'$size')";
-                mysqli_query($sql,$dbconn);
+                mysqli_query($dbconn,$sql);
  			}
 		}
 
@@ -56,17 +56,17 @@ else if($_POST['data_synced_check']){
         if(!$dbconn) return;
 //      echo "2";
         $db = "Sherlockx_General";
-        $db_selected = mysqli_select_db($db, $dbconn);
+        $db_selected = mysqli_select_db($dbconn,$db);
 
         if(!$db_selected){
                 $sql = 'CREATE DATABASE '.$db;
-                mysqli_query($sql,$dbconn);
+                mysqli_query($dbconn,$sql);
 
         }
 
 
         $q = "SELECT * FROM threshold WHERE email ='$email'";
-		if($result = mysqli_query($q,$dbconn)){
+		if($result = mysqli_query($dbconn,$q)){
 
 			if(mysqli_num_rows($result)==0){
 				$ret="true";
@@ -94,7 +94,7 @@ else if($_POST['data_synced_check']){
 				else if($days>30 && $sz<=100000000 || $days>30 && $sz>=100000000){
 
 					$sql = "REPLACE INTO threshold (email,date,size) VALUES ('$email' , '$date' , 0)";
-	                mysqli_query($sql,$dbconn);
+	                mysqli_query($dbconn,$sql);
 					$ret = "true";
 				}
 				else{
@@ -114,4 +114,5 @@ else if($_POST['data_synced_check']){
 
 
 ?>
+
 
