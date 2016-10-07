@@ -1,0 +1,117 @@
+<?php
+//	echo "1";
+	
+if($_POST['data_synced']){
+
+	$rec = explode('-',$_POST['data_synced']);
+	$email = $rec[0];
+	$size = $rec[1];
+	$dbconn = mysql_connect('localhost', 'root', 'brserver');
+	if(!$dbconn) return; 
+//	echo "2";
+	$db = "Sherlockx_General";
+	$db_selected = mysql_select_db($db, $dbconn);
+
+	if(!$db_selected){
+		$sql = 'CREATE DATABASE '.$db;
+		mysql_query($sql,$dbconn);
+		
+	}
+//	echo "3";	
+	$q = "CREATE TABLE IF NOT EXISTS threshold ( email VARCHAR (255) DEFAULT NULL , date VARCHAR (255) , size INTEGER DEFAULT 0,PRIMARY KEY(email))";
+
+	if(mysql_query($q,$dbconn)){
+//		echo "4";	
+		$q = "SELECT * FROM threshold WHERE email ='$email'";
+		if($result=mysql_query($q,$dbconn)){
+			if(mysql_num_rows($result)==0){
+					
+				$date = date('d-m-o');
+			   
+				$sql = "REPLACE INTO threshold (email,date,size) VALUES ('$email' , '$date' ,'$size')";		
+				mysql_query($sql,$dbconn);
+					
+			}
+			else{
+				
+				$row = mysql_fetch_assoc($result);
+                $date = $row['date'];				 
+				$sz= $row['size'];
+				$size = $size + $sz;      
+                $sql = "REPLACE INTO threshold (email,date,size) VALUES ('$email' , '$date' ,'$size')";
+                mysql_query($sql,$dbconn); 
+ 			}
+		}
+	
+	}
+
+	
+}
+
+if($_POST['data_synced_check']){
+		
+		$ret = "true";
+        $email = $_POST['data_synced_check'];
+        $dbconn = mysql_connect('localhost', 'root', 'brserver');
+        if(!$dbconn) return;
+//      echo "2";
+        $db = "Sherlockx_General";
+        $db_selected = mysql_select_db($db, $dbconn);
+
+        if(!$db_selected){
+                $sql = 'CREATE DATABASE '.$db;
+                mysql_query($sql,$dbconn);
+
+        }
+
+       
+        $q = "SELECT * FROM threshold WHERE email ='$email'";
+		if($result = mysql_query($q,$dbconn)){
+			
+			if(mysql_num_rows($result)==0){		
+				$ret="true";
+				
+			}
+
+			else{
+				
+				$row = mysql_fetch_assoc($result);
+		        $datedb = $row['date'];
+		        $sz = $row['size'];
+				$date = date('d-m-o');
+	            
+				$date1 = date_create($date);
+				$date2 = date_create($datedb);
+				$diff12 = $date1->diff($date2);
+				$days = $diff12->days;
+				// echo $date." ";
+				// echo $datedb;
+				// echo "days==".$days." ";
+				if($days<=30 && $sz>=100000000){
+					$ret="false";
+					
+				}
+				else if($days>30 && $sz<=100000000 || $days>30 && $sz>=100000000){
+					
+					$sql = "REPLACE INTO threshold (email,date,size) VALUES ('$email' , '$date' , 0)";
+	                mysql_query($sql,$dbconn);
+					$ret = "true";
+				}
+				else{
+					
+					$ret="true";		
+				}
+			}
+		}
+
+
+		echo $ret;
+}
+
+                        
+
+                
+
+
+?>
+     
